@@ -86,6 +86,9 @@ const Upload = () => {
 
             setStatusText("Analysis complete, redirecting...");
             console.log(data);
+            
+            setIsProcessing(false);
+            navigate(`/resume/${uuid}`);
 
 
 
