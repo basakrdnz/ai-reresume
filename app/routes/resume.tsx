@@ -2,9 +2,8 @@ import type { Route } from "./+types/resume";
 import { useParams, useNavigate, Link } from "react-router";
 import { usePuterStore } from "~/lib/puter";
 import { useState, useEffect } from "react";
-import Summary from "~/components/Summary";
-import ATS from "~/components/ATS";
-import Details from "~/components/Details";
+import Summary from "~/components/feedback/Summary";
+import FullFeedbackDownload from "~/components/feedback/FullFeedbackDownload";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -48,6 +47,7 @@ export default function Resume() {
         const data = JSON.parse(resume);
         setResumeData(data);
         setFeedback(data.feedback);
+        console.log("Full data:", data);
         console.log("Feedback structure:", JSON.stringify(data.feedback, null, 2));
 
         // Load image
@@ -131,8 +131,7 @@ export default function Resume() {
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <Summary feedback={feedback} />
-              <ATS score={feedback?.ATS?.score || 0} suggestions={feedback?.ATS?.tips || []} />
-              <Details feedback={feedback} />
+              <FullFeedbackDownload feedback={feedback} />
             </div>
           ) : (
             <img src="/images/resume-scan-2.gif" className="w-full" alt="loading" />

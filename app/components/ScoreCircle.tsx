@@ -1,13 +1,14 @@
-const ScoreCircle = ({ score = 75 }: { score: number }) => {
-    const radius = 40;
-    const stroke = 8;
+const ScoreCircle = ({ score = 75, size = 100 }: { score: number; size?: number }) => {
+    const radius = size * 0.4;
+    const stroke = size * 0.08;
     const normalizedRadius = radius - stroke / 2;
     const circumference = 2 * Math.PI * normalizedRadius;
     const progress = score / 100;
     const strokeDashoffset = circumference * (1 - progress);
+    const fontSize = size * 0.14;
 
     return (
-        <div className="relative w-[100px] h-[100px]">
+        <div className="relative" style={{ width: `${size}px`, height: `${size}px` }}>
             <svg
                 height="100%"
                 width="100%"
@@ -45,7 +46,7 @@ const ScoreCircle = ({ score = 75 }: { score: number }) => {
 
             {/* Score and issues */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="font-semibold text-sm">{`${score}/100`}</span>
+                <span className="font-semibold" style={{ fontSize: `${fontSize}px` }}>{`${score}/100`}</span>
             </div>
         </div>
     );
