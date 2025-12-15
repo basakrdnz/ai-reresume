@@ -67,3 +67,23 @@ interface AIResponse {
     }[];
     via_ai_chat_service: boolean;
 }
+
+interface MonthlyUsage {
+    allowanceInfo: {
+        monthUsageAllowance: number;
+        remaining: number;
+    };
+    appTotals: {
+        [appId: string]: {
+            count: number;
+            total: number;
+        };
+    };
+    usage: {
+        [apiName: string]: {
+            cost: number;
+            count: number;
+            units: number;
+        };
+    };
+}

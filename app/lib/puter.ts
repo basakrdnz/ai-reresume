@@ -54,6 +54,7 @@ interface PuterStore {
         refreshUser: () => Promise<void>;
         checkAuthStatus: () => Promise<boolean>;
         getUser: () => PuterUser | null;
+        getMonthlyUsage: () => Promise<MonthlyUsage | undefined>;
     };
     fs: {
         write: (
@@ -104,15 +105,16 @@ export const usePuterStore = create<PuterStore>((set, get) => {
         set({
             error: msg,
             isLoading: false,
-            auth: {
-                user: null,
-                isAuthenticated: false,
-                signIn: get().auth.signIn,
-                signOut: get().auth.signOut,
-                refreshUser: get().auth.refreshUser,
-                checkAuthStatus: get().auth.checkAuthStatus,
-                getUser: get().auth.getUser,
-            },
+        auth: {
+            user: null,
+            isAuthenticated: false,
+            signIn: get().auth.signIn,
+            signOut: get().auth.signOut,
+            refreshUser: get().auth.refreshUser,
+            checkAuthStatus: get().auth.checkAuthStatus,
+            getUser: get().auth.getUser,
+            getMonthlyUsage: get().auth.getMonthlyUsage,
+        },
         });
     };
 
@@ -138,6 +140,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                         refreshUser: get().auth.refreshUser,
                         checkAuthStatus: get().auth.checkAuthStatus,
                         getUser: () => user,
+                        getMonthlyUsage: get().auth.getMonthlyUsage,
                     },
                     isLoading: false,
                 });
@@ -152,6 +155,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                         refreshUser: get().auth.refreshUser,
                         checkAuthStatus: get().auth.checkAuthStatus,
                         getUser: () => null,
+                        getMonthlyUsage: get().auth.getMonthlyUsage,
                     },
                     isLoading: false,
                 });
@@ -232,12 +236,28 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                     refreshUser: get().auth.refreshUser,
                     checkAuthStatus: get().auth.checkAuthStatus,
                     getUser: () => user,
+                    getMonthlyUsage: get().auth.getMonthlyUsage,
                 },
                 isLoading: false,
             });
         } catch (err) {
             const msg = err instanceof Error ? err.message : "Failed to refresh user";
             setError(msg);
+        }
+    };
+
+    const getMonthlyUsage = async (): Promise<MonthlyUsage | undefined> => {
+        const puter = getPuter();
+        if (!puter) {
+            console.warn("Puter.js not available");
+            return;
+        }
+
+        try {
+            return await puter.auth.getMonthlyUsage();
+        } catch (err) {
+            console.error("Failed to get monthly usage:", err);
+            return;
         }
     };
 
@@ -423,6 +443,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
             refreshUser,
             checkAuthStatus,
             getUser: () => get().auth.user,
+            getMonthlyUsage,
         },
         fs: {
             write: (path: string, data: string | File | Blob) => write(path, data),

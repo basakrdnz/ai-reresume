@@ -4,6 +4,12 @@ export interface PdfConversionResult {
     error?: string;
 }
 
+export interface PdfMultiConversionResult {
+    imageUrls: string[];
+    files: File[];
+    error?: string;
+}
+
 let pdfjsLib: any = null;
 let isLoading = false;
 let loadPromise: Promise<any> | null = null;
@@ -33,57 +39,76 @@ async function loadPdfJs(): Promise<any> {
 export async function convertPdfToImage(
     file: File
 ): Promise<PdfConversionResult> {
+    const result = await convertPdfToImages(file);
+    if (result.error) {
+        return { imageUrl: "", file: null, error: result.error };
+    }
+
+    return {
+        imageUrl: result.imageUrls[0] || "",
+        file: result.files[0] || null,
+    };
+}
+
+export async function convertPdfToImages(
+    file: File
+): Promise<PdfMultiConversionResult> {
     try {
         const lib = await loadPdfJs();
-
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
-        const page = await pdf.getPage(1);
 
-        const viewport = page.getViewport({ scale: 4 });
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
+        console.debug("[pdf2img] pages:", pdf.numPages, "file:", file.name);
 
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+        const imageUrls: string[] = [];
+        const files: File[] = [];
 
-        if (context) {
-            context.imageSmoothingEnabled = true;
-            context.imageSmoothingQuality = "high";
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+            const page = await pdf.getPage(pageNumber);
+            const viewport = page.getViewport({ scale: 4 });
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            if (context) {
+                context.imageSmoothingEnabled = true;
+                context.imageSmoothingQuality = "high";
+            }
+
+            await page.render({ canvasContext: context!, viewport }).promise;
+
+            const blob: Blob | null = await new Promise((resolve) => {
+                canvas.toBlob((createdBlob) => resolve(createdBlob), "image/png", 1.0);
+            });
+
+            if (!blob) {
+                return {
+                    imageUrls: [],
+                    files: [],
+                    error: "Failed to create image blob",
+                };
+            }
+
+            const originalName = file.name.replace(/\.pdf$/i, "");
+            const imageFile = new File(
+                [blob],
+                `${originalName}-page-${pageNumber}.png`,
+                {
+                    type: "image/png",
+                }
+            );
+
+            imageUrls.push(URL.createObjectURL(blob));
+            files.push(imageFile);
         }
 
-        await page.render({ canvasContext: context!, viewport }).promise;
-
-        return new Promise((resolve) => {
-            canvas.toBlob(
-                (blob) => {
-                    if (blob) {
-                        // Create a File from the blob with the same name as the pdf
-                        const originalName = file.name.replace(/\.pdf$/i, "");
-                        const imageFile = new File([blob], `${originalName}.png`, {
-                            type: "image/png",
-                        });
-
-                        resolve({
-                            imageUrl: URL.createObjectURL(blob),
-                            file: imageFile,
-                        });
-                    } else {
-                        resolve({
-                            imageUrl: "",
-                            file: null,
-                            error: "Failed to create image blob",
-                        });
-                    }
-                },
-                "image/png",
-                1.0
-            ); // Set quality to maximum (1.0)
-        });
+        return { imageUrls, files };
     } catch (err) {
         return {
-            imageUrl: "",
-            file: null,
+            imageUrls: [],
+            files: [],
             error: `Failed to convert PDF: ${err}`,
         };
     }

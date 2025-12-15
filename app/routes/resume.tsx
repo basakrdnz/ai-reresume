@@ -50,10 +50,41 @@ export default function Resume() {
         console.log("Full data:", data);
         console.log("Feedback structure:", JSON.stringify(data.feedback, null, 2));
 
-        // Load image
-        if (data.imagePath) {
+        // Log monthly usage info
+        try {
+          const usage = await auth.getMonthlyUsage();
+          if (usage) {
+            const { allowanceInfo, usage: apiUsage } = usage;
+            const used = allowanceInfo.monthUsageAllowance - allowanceInfo.remaining;
+            const percentage = allowanceInfo.monthUsageAllowance > 0
+              ? ((used / allowanceInfo.monthUsageAllowance) * 100).toFixed(1)
+              : 0;
+
+            console.log("📊 AI Usage Info:", {
+              "Total Allowance": allowanceInfo.monthUsageAllowance,
+              "Remaining": allowanceInfo.remaining,
+              "Used": used,
+              "Usage %": `${percentage}%`,
+            });
+
+            // Log AI-specific usage if available
+            if (apiUsage.ai) {
+              console.log("🤖 AI API Usage:", {
+                "Cost": apiUsage.ai.cost,
+                "Calls": apiUsage.ai.count,
+                "Units": apiUsage.ai.units,
+              });
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to fetch usage info:", err);
+        }
+
+        // Load first image (supports legacy single imagePath and new imagePaths array)
+        const firstImagePath = data.imagePath || data.imagePaths?.[0];
+        if (firstImagePath) {
           try {
-            const imageBlob = await fs.read(data.imagePath);
+            const imageBlob = await fs.read(firstImagePath);
             if (imageBlob) {
               const imageUrl = URL.createObjectURL(imageBlob);
               setImageUrl(imageUrl);
