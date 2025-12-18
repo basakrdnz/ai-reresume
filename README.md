@@ -1,5 +1,7 @@
 # Reresume - AI-Powered Resume Feedback Tool
 
+🌐 **Live Demo:** [https://ai-reresume.vercel.app](https://ai-reresume.vercel.app)
+
 Merhaba! Bu proje, CV'lerinizi yükleyip AI ile detaylı geri bildirim alabileceğiniz bir web uygulaması. İş başvurularınız için CV'nizi optimize etmenize yardımcı oluyor.
 
 ## Neden Bu Projeyi Yaptım?
