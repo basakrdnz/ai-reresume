@@ -9,7 +9,7 @@ const Navbar = (): JSX.Element => {
             </Link>
 
             <Link to="/upload" className="primary-button w-fit">
-                Cv Yükle
+                Upload CV
             </Link>
         </nav>
     );

@@ -69,14 +69,31 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{message} - Reresume</title>
+      </head>
+      <body>
+        <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white p-4">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{message}</h1>
+            <p className="text-lg text-gray-600 mb-8">{details}</p>
+            <a
+              href="/"
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Go Home
+            </a>
+            {stack && import.meta.env.DEV && (
+              <pre className="mt-8 w-full max-w-4xl p-4 overflow-x-auto bg-gray-100 rounded text-left text-sm">
+                <code>{stack}</code>
+              </pre>
+            )}
+          </div>
+        </main>
+      </body>
+    </html>
   );
 }

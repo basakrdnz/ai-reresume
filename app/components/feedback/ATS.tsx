@@ -65,16 +65,16 @@ const ATS = ({
         {finalSuggestions.length > 0 && (
           <div className="flex flex-col gap-2 mt-1">
             {finalSuggestions.map((suggestion, index) => (
-              <div className="flex flex-row gap-2 items-center" key={index}>
-                <img
-                  src={
-                    suggestion.type === "good"
-                      ? "/icons/check.svg"
-                      : "/icons/warning.svg"
-                  }
+          <div className="flex flex-row gap-2 items-center" key={index}>
+            <img
+              src={
+                suggestion.type === "good"
+                  ? "/icons/check.svg"
+                  : "/icons/warning.svg"
+              }
                   alt={suggestion.type}
                   className="w-5 h-5"
-                />
+            />
                 <p className="text-lg text-gray-700">{suggestion.tip}</p>
               </div>
             ))}
@@ -90,3 +90,4 @@ const ATS = ({
 };
 
 export default ATS;
+

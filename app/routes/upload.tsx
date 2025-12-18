@@ -3,9 +3,9 @@ import Navbar from "~/components/Navbar";
 import FileUploader from "~/components/FileUploader";
 import { usePuterStore } from "~/lib/puter";
 import { useNavigate } from "react-router";
-import {convertPdfToImage} from "~/lib/pdf2img";
-import {generateUUID} from "~/lib/utils";
-import {prepareInstructions} from "../../constants";
+import { convertPdfToImages } from "~/lib/pdf2img";
+import { generateUUID } from "~/lib/utils";
+import { AIResponseFormat, prepareInstructions } from "../../constants";
 
 const Upload = () => {
         const { auth, isLoading, fs, ai, kv } = usePuterStore();
@@ -31,22 +31,26 @@ const Upload = () => {
                 return;
             }
 
-            setStatusText("Converting to image...");
-            const imageResult = await convertPdfToImage(file);
+            setStatusText("Converting to images...");
+            const imageResults = await convertPdfToImages(file);
 
-            if (!imageResult.file) {
+            if (imageResults.error || imageResults.files.length === 0) {
                 setStatusText(
-                    imageResult.error || "Error: Failed to convert PDF to image"
+                    imageResults.error || "Error: Failed to convert PDF to images"
                 );
                 return;
             }
 
-            setStatusText("Uploading the image...");
-            const uploadedImage = await fs.upload([imageResult.file]);
+            setStatusText("Uploading the images...");
+            const uploadedImages: { path: string; name: string }[] = [];
 
-            if (!uploadedImage) {
-                setStatusText("Error: Failed to upload image");
-                return;
+            for (const imageFile of imageResults.files) {
+                const uploaded = await fs.upload([imageFile]);
+                if (!uploaded) {
+                    setStatusText("Error: Failed to upload image");
+                    return;
+                }
+                uploadedImages.push({ path: uploaded.path, name: uploaded.name });
             }
 
             setStatusText("Preparing data...");
@@ -56,7 +60,8 @@ const Upload = () => {
             const data = {
                 id: uuid,
                 resumePath: uploadedFile.path,
-                imagePath: uploadedImage.path,
+                imagePath: uploadedImages[0]?.path, // keep first image for backward compatibility
+                imagePaths: uploadedImages.map((img) => img.path),
                 companyName,
                 jobTitle,
                 jobDescription,
@@ -69,23 +74,48 @@ const Upload = () => {
 
             const feedback: AIResponse | undefined = await ai.feedback(
                 uploadedFile.path,
-                prepareInstructions({AIResponseFormat: "", jobTitle, jobDescription })
+                prepareInstructions({
+                    AIResponseFormat,
+                    jobTitle,
+                    jobDescription,
+                })
             );
 
             if (!feedback)
                 return setStatusText("Error: Failed to analyze resume");
 
-            const feedbackText =
-                typeof feedback.message.content === "string"
+            const feedbackRaw =
+                typeof feedback.message?.content === "string"
                     ? feedback.message.content
-                    : feedback.message.content[0].text;
+                    : feedback.message?.content?.[0]?.text;
 
-            data.feedback = JSON.parse(feedbackText);
+            if (!feedbackRaw) {
+                setStatusText("Error: Empty analysis response");
+                setIsProcessing(false);
+                return;
+            }
+
+            try {
+                data.feedback = JSON.parse(feedbackRaw);
+            } catch (err) {
+                const lower = feedbackRaw.toLowerCase();
+                const usageLimit =
+                    lower.includes("usage limit") ||
+                    lower.includes("quota") ||
+                    lower.includes("rate limit");
+
+                setStatusText(
+                    usageLimit
+                        ? "AI usage limit reached. Please try again later."
+                        : "Error: Received invalid analysis response"
+                );
+                setIsProcessing(false);
+                return;
+            }
 
             await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
             setStatusText("Analysis complete, redirecting...");
-            console.log(data);
             
             setIsProcessing(false);
             navigate(`/resume/${uuid}`);
@@ -116,7 +146,9 @@ const Upload = () => {
             });
         };
 return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover">
+    <main className="relative bg-[url('/images/bg-main.svg')] bg-cover">
+        <div className="absolute inset-0 bg-black/5"></div>
+        <div className="relative z-10">
         <Navbar/>
 
         <section className="main-section">
@@ -181,6 +213,7 @@ return (
                 )}
             </div>
         </section>
+        </div>
     </main>
 );
 }

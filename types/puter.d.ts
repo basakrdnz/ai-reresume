@@ -49,6 +49,16 @@ interface PuterChatOptions {
     };
 }
 
+interface PuterEmailPayload {
+    to: string | string[];
+    subject: string;
+    body: string;
+}
+
+interface PuterEmailAPI {
+    send: (payload: PuterEmailPayload) => Promise<any>;
+}
+
 interface AIResponse {
     index: number;
     message: {
@@ -66,4 +76,24 @@ interface AIResponse {
         cost: number;
     }[];
     via_ai_chat_service: boolean;
+}
+
+interface MonthlyUsage {
+    allowanceInfo: {
+        monthUsageAllowance: number;
+        remaining: number;
+    };
+    appTotals: {
+        [appId: string]: {
+            count: number;
+            total: number;
+        };
+    };
+    usage: {
+        [apiName: string]: {
+            cost: number;
+            count: number;
+            units: number;
+        };
+    };
 }
