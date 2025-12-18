@@ -48,37 +48,12 @@ export default function Resume() {
         const data = JSON.parse(resume);
         setResumeData(data);
         setFeedback(data.feedback);
-        console.log("Full data:", data);
-        console.log("Feedback structure:", JSON.stringify(data.feedback, null, 2));
 
-        // Log monthly usage info
+        // Fetch monthly usage info (silently, no logging in production)
         try {
-          const usage = await auth.getMonthlyUsage();
-          if (usage) {
-            const { allowanceInfo, usage: apiUsage } = usage;
-            const used = allowanceInfo.monthUsageAllowance - allowanceInfo.remaining;
-            const percentage = allowanceInfo.monthUsageAllowance > 0
-              ? ((used / allowanceInfo.monthUsageAllowance) * 100).toFixed(1)
-              : 0;
-
-            console.log("📊 AI Usage Info:", {
-              "Total Allowance": allowanceInfo.monthUsageAllowance,
-              "Remaining": allowanceInfo.remaining,
-              "Used": used,
-              "Usage %": `${percentage}%`,
-            });
-
-            // Log AI-specific usage if available
-            if (apiUsage.ai) {
-              console.log("🤖 AI API Usage:", {
-                "Cost": apiUsage.ai.cost,
-                "Calls": apiUsage.ai.count,
-                "Units": apiUsage.ai.units,
-              });
-            }
-          }
+          await auth.getMonthlyUsage();
         } catch (err) {
-          console.warn("Failed to fetch usage info:", err);
+          // Silently handle usage fetch errors
         }
 
         // Load first image (supports legacy single imagePath and new imagePaths array)
@@ -91,7 +66,7 @@ export default function Resume() {
               setImageUrl(imageUrl);
             }
           } catch (err) {
-            console.error("Failed to load image:", err);
+            // Silently handle image load errors
           }
         }
 
@@ -105,11 +80,11 @@ export default function Resume() {
             const resumeUrl = URL.createObjectURL(pdfBlob);
             setResumeUrl(resumeUrl);
           } catch (err) {
-            console.error("Failed to load resume:", err);
+            // Silently handle resume load errors
           }
         }
       } catch (err) {
-        console.error("Failed to load resume data:", err);
+        // Silently handle resume data load errors
       } finally {
         setLoading(false);
       }

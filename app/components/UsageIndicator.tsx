@@ -38,7 +38,7 @@ const UsageIndicator = () => {
           });
         }
       } catch (err) {
-        console.warn("Failed to fetch usage info:", err);
+        // Silently handle usage fetch errors
       } finally {
         setIsLoading(false);
       }

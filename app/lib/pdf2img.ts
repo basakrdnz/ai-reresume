@@ -58,7 +58,6 @@ export async function convertPdfToImages(
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await lib.getDocument({ data: arrayBuffer }).promise;
 
-        console.debug("[pdf2img] pages:", pdf.numPages, "file:", file.name);
 
         const imageUrls: string[] = [];
         const files: File[] = [];

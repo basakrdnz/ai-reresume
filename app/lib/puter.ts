@@ -257,14 +257,14 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     const getMonthlyUsage = async (): Promise<MonthlyUsage | undefined> => {
         const puter = getPuter();
         if (!puter) {
-            console.warn("Puter.js not available");
+            // Puter.js not available - will retry
             return;
         }
 
         try {
             return await puter.auth.getMonthlyUsage();
         } catch (err) {
-            console.error("Failed to get monthly usage:", err);
+            // Silently handle usage fetch errors
             return;
         }
     };

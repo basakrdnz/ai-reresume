@@ -20,8 +20,8 @@ const Auth = () => {
     return (
         <main className="relative bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center">
             <div className="absolute inset-0 bg-black/5"></div>
-            <div className="relative z-10 gradient-border shadow-lg">
-                <section className="flex flex-col gap-8 bg-white rounded-2xl p-10">
+            <div className="relative z-10 rounded-3xl bg-gray-50/5 backdrop-blur-xl shadow-2xl">
+                <section className="flex flex-col gap-8 rounded-2xl p-16 shadow-2xl">
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1>Welcome</h1>
                         <h2>Log In to Continue Your Job Journey</h2>

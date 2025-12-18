@@ -95,13 +95,9 @@ const Upload = () => {
                 return;
             }
 
-            const feedbackPreview = feedbackRaw.slice(0, 200);
-            console.debug("AI feedback preview:", feedbackPreview);
-
             try {
                 data.feedback = JSON.parse(feedbackRaw);
             } catch (err) {
-                console.error("Failed to parse feedback JSON", err, feedbackPreview);
                 const lower = feedbackRaw.toLowerCase();
                 const usageLimit =
                     lower.includes("usage limit") ||
@@ -120,7 +116,6 @@ const Upload = () => {
             await kv.set(`resume:${uuid}`, JSON.stringify(data));
 
             setStatusText("Analysis complete, redirecting...");
-            console.log(data);
             
             setIsProcessing(false);
             navigate(`/resume/${uuid}`);
