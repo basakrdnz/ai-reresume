@@ -38,11 +38,11 @@ label {
     @apply text-dark-200;
 }
 input {
-    @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none bg-white;
+    @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none bg-white shadow-sm;
 }
 
 textarea {
-    @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none bg-white;
+    @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none bg-white shadow-sm;
 }
 
 form {

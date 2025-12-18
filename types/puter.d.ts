@@ -49,6 +49,16 @@ interface PuterChatOptions {
     };
 }
 
+interface PuterEmailPayload {
+    to: string | string[];
+    subject: string;
+    body: string;
+}
+
+interface PuterEmailAPI {
+    send: (payload: PuterEmailPayload) => Promise<any>;
+}
+
 interface AIResponse {
     index: number;
     message: {

@@ -8,6 +8,7 @@ declare global {
                 isSignedIn: () => Promise<boolean>;
                 signIn: () => Promise<void>;
                 signOut: () => Promise<void>;
+                getMonthlyUsage: () => Promise<MonthlyUsage>;
             };
             fs: {
                 write: (
@@ -30,6 +31,9 @@ declare global {
                     image: string | File | Blob,
                     testMode?: boolean
                 ) => Promise<string>;
+            };
+            email: {
+                send: (payload: PuterEmailPayload) => Promise<any>;
             };
             kv: {
                 get: (key: string) => Promise<string | null>;
@@ -81,6 +85,9 @@ interface PuterStore {
             image: string | File | Blob,
             testMode?: boolean
         ) => Promise<string | undefined>;
+    };
+    email: {
+        send: (payload: PuterEmailPayload) => Promise<any | undefined>;
     };
     kv: {
         get: (key: string) => Promise<string | null | undefined>;
@@ -207,6 +214,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                     refreshUser: get().auth.refreshUser,
                     checkAuthStatus: get().auth.checkAuthStatus,
                     getUser: () => null,
+                    getMonthlyUsage: get().auth.getMonthlyUsage,
                 },
                 isLoading: false,
             });
@@ -383,6 +391,41 @@ export const usePuterStore = create<PuterStore>((set, get) => {
         return puter.ai.img2txt(image, testMode);
     };
 
+    const sendEmail = async (payload: PuterEmailPayload) => {
+        // wait for puter and puter.email to be ready (script can be async)
+        const waitForEmail = async (retries = 30, delayMs = 200): Promise<typeof window.puter | null> => {
+            for (let i = 0; i < retries; i++) {
+                const p = getPuter();
+                if (p?.email?.send) return p;
+                await new Promise((r) => setTimeout(r, delayMs));
+            }
+            return null;
+        };
+
+        let puter = getPuter();
+        if (!puter?.email?.send) {
+            puter = await waitForEmail();
+        }
+
+        if (!puter) {
+            setError("Puter.js not available");
+            return;
+        }
+
+        if (!puter.email?.send) {
+            setError("Email service not available");
+            return;
+        }
+
+        try {
+            return await puter.email.send(payload);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Email send failed";
+            setError(msg);
+            return;
+        }
+    };
+
     const getKV = async (key: string) => {
         const puter = getPuter();
         if (!puter) {
@@ -462,6 +505,9 @@ export const usePuterStore = create<PuterStore>((set, get) => {
             feedback: (path: string, message: string) => feedback(path, message),
             img2txt: (image: string | File | Blob, testMode?: boolean) =>
                 img2txt(image, testMode),
+        },
+        email: {
+            send: (payload: PuterEmailPayload) => sendEmail(payload),
         },
         kv: {
             get: (key: string) => getKV(key),

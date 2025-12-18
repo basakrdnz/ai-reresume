@@ -4,6 +4,7 @@ import { usePuterStore } from "~/lib/puter";
 import { useState, useEffect } from "react";
 import Summary from "~/components/feedback/Summary";
 import FullFeedbackDownload from "~/components/feedback/FullFeedbackDownload";
+import UsageIndicator from "~/components/UsageIndicator";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -157,16 +158,19 @@ export default function Resume() {
       </nav>
 
       <div className="flex flex-row w-full max-lg:flex-col-reverse">
-        <section className="feedback-section bg-[url('/images/bg-small.svg')] bg-cover">
+        <section className="relative feedback-section bg-[url('/images/bg-small.svg')] bg-cover">
+          <div className="absolute inset-0 bg-black/5"></div>
+          <div className="relative z-10">
           <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <Summary feedback={feedback} />
-              <FullFeedbackDownload feedback={feedback} />
+              <FullFeedbackDownload feedback={feedback} resumeUrl={resumeUrl} />
             </div>
           ) : (
             <img src="/images/resume-scan-2.gif" className="w-full" alt="loading" />
           )}
+          </div>
         </section>
 
         {imageUrl && resumeUrl && (
@@ -182,6 +186,8 @@ export default function Resume() {
           </div>
         )}
       </div>
+
+      <UsageIndicator />
     </main>
   );
 }

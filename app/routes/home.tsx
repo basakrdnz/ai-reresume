@@ -9,7 +9,7 @@ import {useEffect} from "react";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Reresume" },
-    { name: "description", content: "Hayalindeki işe adım adım.." },
+    { name: "description", content: "Step by step to your dream job.." },
   ];
 }
 
@@ -20,12 +20,14 @@ export default function Home() {
     useEffect(() => {
         if(!auth.isAuthenticated) navigate('/auth?next=/');
     }, [auth.isAuthenticated]);
-    return <main className="bg-[url('/images/bg-main.svg')] bg-cover')]">
+    return <main className="relative bg-[url('/images/bg-main.svg')] bg-cover">
+        <div className="absolute inset-0 bg-black/5"></div>
+        <div className="relative z-10">
         <Navbar></Navbar>
         <section className="main-section">
             <div className="page-heading py-16">
-                <h1>Başvurularını ve Cv Puanlamalarını Takip Et</h1>
-                <h2>Başvurularını gözden geçir ve AI ile feedback al.</h2>
+                <h1>Track Your Applications and CV Scores</h1>
+                <h2>Review your applications and get AI-powered feedback.</h2>
             </div>
         {resumes.length > 0 && (
             <div className="resumes-section">
@@ -35,6 +37,6 @@ export default function Home() {
             </div>
         )}
         </section>
-
+        </div>
     </main>
 }

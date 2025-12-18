@@ -151,7 +151,9 @@ const Upload = () => {
             });
         };
 return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover">
+    <main className="relative bg-[url('/images/bg-main.svg')] bg-cover">
+        <div className="absolute inset-0 bg-black/5"></div>
+        <div className="relative z-10">
         <Navbar/>
 
         <section className="main-section">
@@ -216,6 +218,7 @@ return (
                 )}
             </div>
         </section>
+        </div>
     </main>
 );
 }

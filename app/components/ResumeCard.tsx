@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import ScoreCircle from "~/components/ScoreCircle";
 
 const ResumeCard = ({
@@ -7,8 +6,7 @@ const ResumeCard = ({
     resume: Resume;
 }) => {
     return (
-        <Link
-            to={`/resume/${id}`}
+        <div
             className="resume-card animate-in fade-in duration-1000"
         >
             <div className="resume-card-header">
@@ -31,7 +29,7 @@ const ResumeCard = ({
                 </div>
             </div>
 
-        </Link>
+        </div>
     );
 };
 
